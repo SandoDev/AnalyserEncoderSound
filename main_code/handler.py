@@ -1,8 +1,7 @@
-import os
 import glob
 import pyaudio
 import wave
-from tkinter import Button, Frame, Label, Tk
+from tkinter import Button, Frame, Label, Tk, Listbox
 import threading
 
 
@@ -25,6 +24,9 @@ class AnalizerEncoderSound:
         frame2 = Frame(main_frame, padx=5, pady=5)
         frame2.pack()
 
+        frame3 = Frame(main_frame, padx=5, pady=5)
+        frame3.pack()
+
         # Etiquetas
         self.time = Label(
             frame1,
@@ -44,17 +46,26 @@ class AnalizerEncoderSound:
             font=("", "15")
         )
         self.status_recording.pack()
+        title_list = Label(
+            frame3,
+            text="List of audio files",
+        )
+        title_list.pack()
 
         # BOTONES
         self.btn_iniciar = Button(frame2, fg='blue', width=16,
-                                  text='Grabar', command=self.start_recording)
+                                  text='Grabar', command=self.start_execution)
         self.btn_iniciar.grid(row=0, column=0)
 
         self.btn_parar = Button(frame2, fg='blue', width=16,
                                 text='Parar', command=self.stop_recording)
         self.btn_parar.grid(row=0, column=1)
 
-    def start_recording(self):
+        # listbox
+        self.list_udio_files = Listbox(frame3)
+        self.list_udio_files.pack()
+
+    def start_execution(self):
         self.recording = True
         self.btn_iniciar.config(state='disabled')
 
@@ -79,6 +90,14 @@ class AnalizerEncoderSound:
             self.time.after_cancel(self.process_timer)
             self.time['text'] = "00"
             self.seconds_counter = 0
+        self.read_audio_files()
+
+    def read_audio_files(self):
+        lines = self.list_udio_files.size()
+        self.list_udio_files.delete(0, lines)
+        recordings = glob.glob('*.mp3')
+        for i, value in enumerate(recordings):
+            self.list_udio_files.insert(i+1, value)
 
     def record_sound(self, format, channels, rate, frames_per_buffer, audio, archivo):
         stream = audio.open(
@@ -104,11 +123,11 @@ class AnalizerEncoderSound:
         stream.close()
         audio.terminate()
 
-        grabs = glob.glob('*.mp3')
+        recordings = glob.glob('*.mp3')
 
         # CREAMOS/GUARDAMOS EL ARCHIVO DE AUDIO
         count = 0
-        for i in grabs:
+        for i in recordings:
             if "grabacion" in i:
                 count += 1
         if count > 0:
