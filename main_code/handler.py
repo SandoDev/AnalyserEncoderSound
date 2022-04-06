@@ -6,6 +6,7 @@ import threading
 from makelab import signal
 from main_code.fourier import calc_and_plot_xcorr_dft_with_ground_truth
 import matplotlib.pyplot as plt
+import scipy.io.wavfile as waves
 
 
 class AnalizerEncoderSound:
@@ -69,12 +70,13 @@ class AnalizerEncoderSound:
         self.btn_fourier.grid(row=0, column=2)
 
         # listbox
-        self.list_udio_files = Listbox(frame3)
+        self.list_udio_files = Listbox(frame3,)
         self.list_udio_files.pack()
 
-    def fourier_analysis(self):
-        self.btn_start.config(state='disabled')
-        self.btn_stop.config(state='disabled')
+    def run_analysis(self):
+        file_sound = self.list_udio_files.get(0)
+        samplerate, data = waves.read(file_sound) 
+        Audio_m = data[:,0]
 
         sampling_rate = 800
         total_time_in_secs = 0.5
@@ -87,11 +89,18 @@ class AnalizerEncoderSound:
             freq2, sampling_rate, total_time_in_secs)
         signal3 = signal.create_sine_wave(
             freq3, sampling_rate, total_time_in_secs)
-        signal_composite = signal1 + signal2 + signal3
-        time_domain_title = f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
+        signal_composite = Audio_m #signal1 + signal2 + signal3
+        time_domain_title = "NANA"#f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
         calc_and_plot_xcorr_dft_with_ground_truth(
-            signal_composite, sampling_rate, time_domain_graph_title=time_domain_title)
+            signal_composite, samplerate, time_domain_graph_title=time_domain_title)
         plt.show()
+
+    def fourier_analysis(self):
+        self.btn_start.config(state='disabled')
+        self.btn_stop.config(state='disabled')
+
+        fourier_thread = threading.Thread(target=self.run_analysis)
+        fourier_thread.start()
 
         self.btn_start.config(state='normal')
         self.btn_stop.config(state='normal')
@@ -103,9 +112,9 @@ class AnalizerEncoderSound:
         audio = pyaudio.PyAudio()
         FORMAT = pyaudio.paInt16
         CHANNELS = 2
-        RATE = 44100
+        RATE = 16000
         CHUNK = 1024
-        archivo = "grabacion.mp3"
+        archivo = "grabacion.wav"
         rec_sound_thread = threading.Thread(
             target=self.record_sound,
             args=(FORMAT, CHANNELS, RATE, CHUNK, audio, archivo)
@@ -126,7 +135,7 @@ class AnalizerEncoderSound:
     def read_audio_files(self):
         lines = self.list_udio_files.size()
         self.list_udio_files.delete(0, lines)
-        recordings = glob.glob('*.mp3')
+        recordings = glob.glob('*.wav')
         for i, value in enumerate(recordings):
             self.list_udio_files.insert(i+1, value)
 
@@ -154,7 +163,7 @@ class AnalizerEncoderSound:
         stream.close()
         audio.terminate()
 
-        recordings = glob.glob('*.mp3')
+        recordings = glob.glob('*.wav')
 
         # CREAMOS/GUARDAMOS EL ARCHIVO DE AUDIO
         count = 0
@@ -162,7 +171,7 @@ class AnalizerEncoderSound:
             if "grabacion" in i:
                 count += 1
         if count > 0:
-            archivo = "grabacion"+"("+str(count)+")"+".mp3"
+            archivo = "grabacion"+"("+str(count)+")"+".wav"
 
         waveFile = wave.open(archivo, 'wb')
         waveFile.setnchannels(channels)
