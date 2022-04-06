@@ -3,6 +3,9 @@ import pyaudio
 import wave
 from tkinter import Button, Frame, Label, Tk, Listbox
 import threading
+from makelab import signal
+from main_code.fourier import calc_and_plot_xcorr_dft_with_ground_truth
+import matplotlib.pyplot as plt
 
 
 class AnalizerEncoderSound:
@@ -53,21 +56,49 @@ class AnalizerEncoderSound:
         title_list.pack()
 
         # BOTONES
-        self.btn_iniciar = Button(frame2, fg='blue', width=16,
-                                  text='Grabar', command=self.start_execution)
-        self.btn_iniciar.grid(row=0, column=0)
+        self.btn_start = Button(frame2, fg='blue', width=16,
+                                text='Grabar', command=self.start_execution)
+        self.btn_start.grid(row=0, column=0)
 
-        self.btn_parar = Button(frame2, fg='blue', width=16,
-                                text='Parar', command=self.stop_recording)
-        self.btn_parar.grid(row=0, column=1)
+        self.btn_stop = Button(frame2, fg='blue', width=16,
+                               text='Parar', command=self.stop_recording)
+        self.btn_stop.grid(row=0, column=1)
+
+        self.btn_fourier = Button(frame2, fg='blue', width=16,
+                                  text='Fourier Analysis', command=self.fourier_analysis)
+        self.btn_fourier.grid(row=0, column=2)
 
         # listbox
         self.list_udio_files = Listbox(frame3)
         self.list_udio_files.pack()
 
+    def fourier_analysis(self):
+        self.btn_start.config(state='disabled')
+        self.btn_stop.config(state='disabled')
+
+        sampling_rate = 800
+        total_time_in_secs = 0.5
+        freq1 = 10
+        freq2 = 42
+        freq3 = 151
+        signal1 = signal.create_sine_wave(
+            freq1, sampling_rate, total_time_in_secs)
+        signal2 = signal.create_sine_wave(
+            freq2, sampling_rate, total_time_in_secs)
+        signal3 = signal.create_sine_wave(
+            freq3, sampling_rate, total_time_in_secs)
+        signal_composite = signal1 + signal2 + signal3
+        time_domain_title = f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
+        calc_and_plot_xcorr_dft_with_ground_truth(
+            signal_composite, sampling_rate, time_domain_graph_title=time_domain_title)
+        plt.show()
+
+        self.btn_start.config(state='normal')
+        self.btn_stop.config(state='normal')
+
     def start_execution(self):
         self.recording = True
-        self.btn_iniciar.config(state='disabled')
+        self.btn_start.config(state='disabled')
 
         audio = pyaudio.PyAudio()
         FORMAT = pyaudio.paInt16
@@ -86,7 +117,7 @@ class AnalizerEncoderSound:
     def stop_recording(self):
         if self.recording:
             self.recording = False
-            self.btn_iniciar.config(state='normal')
+            self.btn_start.config(state='normal')
             self.time.after_cancel(self.process_timer)
             self.time['text'] = "00"
             self.seconds_counter = 0
