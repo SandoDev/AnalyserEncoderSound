@@ -1,2 +1,6 @@
 PyAudio==0.2.11
 Wave==0.0.2
+matplotlib==3.5.1
+scipy==1.8.0
+librosa==0.9.1
+ipywidgets==7.7.0
