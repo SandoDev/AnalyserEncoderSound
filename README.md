@@ -25,3 +25,7 @@ cod. 20202678031
 ## Execution
 1. Run the `main.py` file
 2. Record the sounds
+3. Refresh list of sounds
+4. Show originals charts of signals
+5. Run Fourier Analysis
+6. Run Digital2Digital encode
