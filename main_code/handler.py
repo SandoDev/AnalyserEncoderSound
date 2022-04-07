@@ -2,9 +2,8 @@ import glob
 import tkinter as tk
 import pyaudio
 import wave
-from tkinter import RIGHT, Button, Frame, Label, Tk, Listbox
+from tkinter import Button, Frame, Label, Tk, Listbox
 import threading
-from makelab import signal
 from main_code.fourier import calc_and_plot_xcorr_dft_with_ground_truth
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as waves
@@ -272,19 +271,16 @@ class AnalizerEncoderSound:
 
     def run_analysis(self):
         lines = self.list_udio_files.size()
-        signal = np.ndarray([])
+        signal_composite = np.ndarray([])
         for i in range(lines):
             file_sound = self.list_udio_files.get(i)
             samplerate, data = waves.read(file_sound)
-            signal = signal+data[:-800, 0]
+            signal_composite = signal_composite+data[:-800, 0]
 
-        signal_composite = signal  # signal1 + signal2 + signal3
-        # f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
-        time_domain_title = "NANA"
         calc_and_plot_xcorr_dft_with_ground_truth(
             signal_composite,
             samplerate,
-            time_domain_graph_title=time_domain_title
+            time_domain_graph_title="Sounds loaded: 5 seconds"
         )
         plt.show()
 
