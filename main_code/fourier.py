@@ -126,8 +126,8 @@ def calc_and_plot_xcorr_dft_with_ground_truth(s, sampling_rate,
     if xcorr_freq_step_size is not None:
         freq_seq_iter = np.arange(1, nyquist_limit, xcorr_freq_step_size)
         freq_step_size = xcorr_freq_step_size
-    progress_bar = ipywidgets.FloatProgress(value=1, min=1, max=nyquist_limit)
-    ipd.display(progress_bar)
+    # progress_bar = ipywidgets.FloatProgress(value=1, min=1, max=nyquist_limit)
+    # ipd.display(progress_bar)
     num_comparisons = 0
     for test_freq in freq_seq_iter:
         signal_to_test = signal.create_sine_wave(
@@ -137,7 +137,7 @@ def calc_and_plot_xcorr_dft_with_ground_truth(s, sampling_rate,
         freq_and_correlation_results.append(
             (test_freq, np.max(correlate_result)))
         num_comparisons += 1
-        progress_bar.value += freq_step_size
+        # progress_bar.value += freq_step_size
     # The `freq_and_correlation_results` is a list of tuple results with (freq,correlation result)
     # Unpack this tuple list into two separate lists freqs, and correlation_results
     correlation_freqs, correlation_results = list(
@@ -224,6 +224,7 @@ def calc_and_plot_xcorr_dft_with_ground_truth(s, sampling_rate,
             axes[2].text(fft_freq_peaks[i] + 2, fft_freq_peaks_amplitudes[i],
                          f"{fft_freq_peaks[i]} Hz", color="black")
 
+    """
     print("**Brute force cross-correlation DFT**")
     print(f"Num cross correlations: {num_comparisons}")
     print(f"Frequency step resolution for cross correlation: {freq_step_size}")
@@ -241,6 +242,7 @@ def calc_and_plot_xcorr_dft_with_ground_truth(s, sampling_rate,
     print(
         f"The minimum peak amplitude threshold set to:{minimum_freq_amplitude}")
     print(f"Freq and amplitudes: {fft_freq_peaks_with_amplitudes_csv} Hz")
+    """
     #print(fft_freqs[fft_peaks_indices] + "Hz")
     fig.tight_layout(pad=2)
     return (fig, axes, correlation_freqs, correlation_results, fft_freqs, fft_spectrum)

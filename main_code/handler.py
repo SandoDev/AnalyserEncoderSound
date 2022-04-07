@@ -292,7 +292,23 @@ class AnalizerEncoderSound:
             self.list_udio_files.insert(i+1, value)
 
     def simple_charts(self):
-        print("simple_charts")
+        signal_composite = np.ndarray([])
+
+        lines = self.list_udio_files.size()
+        _, ax = plt.subplots(lines+1, 1, sharex='col', figsize=(10, 16))
+        plt.suptitle("Original signals")
+        for i in range(lines):
+            file_sound = self.list_udio_files.get(i)
+            _, data = waves.read(file_sound)
+            audio_data = data[:-800, 0]
+            ax[i].plot(audio_data)
+            ax[i].set_title(file_sound)
+            signal_composite = signal_composite+audio_data
+
+        ax[lines].plot(signal_composite, color="g")
+        ax[lines].set_title('Sum of all signals')
+
+        plt.show()
 
     def digital_to_digital(self):
         print("digital_to_digital")
