@@ -205,52 +205,12 @@ class AnalizerEncoderSound:
             fill=tk.X
         )
 
-    def simple_charts(self):
-        print("simple_charts")
-
-    def digital_to_digital(self):
-        print("digital_to_digital")
-
-    def run_analysis(self):
-        lines = self.list_udio_files.size()
-        signal = np.ndarray([])
-        for i in range(lines):
-            file_sound = self.list_udio_files.get(i)
-            samplerate, data = waves.read(file_sound)
-            signal = signal+data[:-800, 0]
-
-        signal_composite = signal  # signal1 + signal2 + signal3
-        # f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
-        time_domain_title = "NANA"
-        calc_and_plot_xcorr_dft_with_ground_truth(
-            signal_composite,
-            samplerate,
-            time_domain_graph_title=time_domain_title
-        )
-        plt.show()
-
-    def fourier_analysis(self):
-        self.btn_start.config(state='disabled')
-        self.btn_stop.config(state='disabled')
-
-        self.run_analysis()
-
-        self.btn_start.config(state='normal')
-        self.btn_stop.config(state='normal')
-
     def start_execution(self):
         self.btn_start.config(state='disabled')
         rec_sound_thread = threading.Thread(target=self.record_sound)
         count_time_thread = threading.Thread(target=self.chronometer)
         rec_sound_thread.start()
         count_time_thread.start()
-
-    def read_audio_files(self):
-        lines = self.list_udio_files.size()
-        self.list_udio_files.delete(0, lines)
-        recordings = glob.glob('*.wav')
-        for i, value in enumerate(recordings):
-            self.list_udio_files.insert(i+1, value)
 
     def record_sound(self):
         audio = pyaudio.PyAudio()
@@ -284,9 +244,8 @@ class AnalizerEncoderSound:
         stream.close()
         audio.terminate()
 
-        recordings = glob.glob('*.wav')
-
         # CREAMOS/GUARDAMOS EL ARCHIVO DE AUDIO
+        recordings = glob.glob('*.wav')
         count = 0
         for i in recordings:
             if "grabacion" in i:
@@ -305,3 +264,39 @@ class AnalizerEncoderSound:
         self.time['text'] = str(self.seconds_counter)
         self.seconds_counter += 1
         self.process_timer = self.time.after(1000, self.chronometer)
+
+    def fourier_analysis(self):
+        self.btn_start.config(state='disabled')
+        self.run_analysis()
+        self.btn_start.config(state='normal')
+
+    def run_analysis(self):
+        lines = self.list_udio_files.size()
+        signal = np.ndarray([])
+        for i in range(lines):
+            file_sound = self.list_udio_files.get(i)
+            samplerate, data = waves.read(file_sound)
+            signal = signal+data[:-800, 0]
+
+        signal_composite = signal  # signal1 + signal2 + signal3
+        # f"Signal with freqs {freq1}Hz, {freq2}Hz, and {freq3}Hz sampled at 800Hz (length: {total_time_in_secs}s)"
+        time_domain_title = "NANA"
+        calc_and_plot_xcorr_dft_with_ground_truth(
+            signal_composite,
+            samplerate,
+            time_domain_graph_title=time_domain_title
+        )
+        plt.show()
+
+    def read_audio_files(self):
+        lines = self.list_udio_files.size()
+        self.list_udio_files.delete(0, lines)
+        recordings = glob.glob('*.wav')
+        for i, value in enumerate(recordings):
+            self.list_udio_files.insert(i+1, value)
+
+    def simple_charts(self):
+        print("simple_charts")
+
+    def digital_to_digital(self):
+        print("digital_to_digital")
