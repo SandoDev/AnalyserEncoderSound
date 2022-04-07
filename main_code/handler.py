@@ -274,12 +274,12 @@ class AnalizerEncoderSound:
         signal_composite = np.ndarray([])
         for i in range(lines):
             file_sound = self.list_udio_files.get(i)
-            samplerate, data = waves.read(file_sound)
+            _, data = waves.read(file_sound)
             signal_composite = signal_composite+data[:-800, 0]
 
         calc_and_plot_xcorr_dft_with_ground_truth(
             signal_composite,
-            samplerate,
+            800,
             time_domain_graph_title="Sounds loaded: 5 seconds"
         )
         plt.show()
