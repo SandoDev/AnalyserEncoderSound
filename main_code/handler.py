@@ -5,6 +5,8 @@ import wave
 from tkinter import Button, Frame, Label, Tk, Listbox
 import threading
 from main_code.fourier import calc_and_plot_xcorr_dft_with_ground_truth
+from main_code.codification_signals import enconding_man_diff
+from main_code.codification_signals import analog_to_digital_converter
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as waves
 import numpy as np
@@ -307,8 +309,37 @@ class AnalizerEncoderSound:
 
         ax[lines].plot(signal_composite, color="g")
         ax[lines].set_title('Sum of all signals')
+        plt.axhline(0, color='black')
 
         plt.show()
 
     def digital_to_digital(self):
-        print("digital_to_digital")
+        lines = self.list_udio_files.size()
+        signal_composite = np.ndarray([])
+        for i in range(lines):
+            file_sound = self.list_udio_files.get(i)
+            _, data = waves.read(file_sound)
+            signal_composite = signal_composite+data[:-800, 0]
+
+        new_signal = analog_to_digital_converter(signal_composite, 20, 5)
+
+        L = 32  # number of digital samples per data bit
+        voltage_level = 20  # peak voltage level in Volts
+        data1 = new_signal[0]
+        clk = np.arange(0, 2*len(data1)) % 2  # clock samples
+
+        man_diff1 = enconding_man_diff(clk, data1)
+
+        manchesterdiff_seq = np.repeat(man_diff1, L)
+        clk_seq = np.repeat(clk, L)
+        data_seq = np.repeat(data1, 2*L)
+
+        _, ax = plt.subplots(3, 1, sharex='col', figsize=(10, 14))
+        ax[0].plot(clk_seq)
+        ax[0].set_title('Clocking')
+        ax[1].plot(data_seq)
+        ax[1].set_title('Digital Data')
+        ax[2].plot(manchesterdiff_seq)
+        ax[2].set_title('Manchester Differential')
+
+        plt.show()
